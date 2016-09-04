@@ -1,0 +1,149 @@
+// Tatami: flex layout grid system.
+
+// IMPORT //////////////////////////////////////////////////////////////////////
+@import "common";
+
+// SETTINGS ////////////////////////////////////////////////////////////////////
+
+// MIXINS //////////////////////////////////////////////////////////////////////
+
+// PLACEHOLDERS ////////////////////////////////////////////////////////////////
+
+// MAIN ////////////////////////////////////////////////////////////////////////
+#{ $root_arrange } {
+	&--x,
+	&--y,
+	&--c {
+		display        : flex;
+		flex-flow      : row wrap;
+		justify-content: flex-start;
+		align-items    : flex-start;
+		align-content  : stretch;
+		> * {
+//			display: flex;
+//			display: inline-flex;
+//			flex: 0 0 auto;
+			flex: 1 0 25%;
+			max-width: 100%;
+		}
+		@include all_item_in( $fixed_item_list, "> {{item}}" ) {
+			flex: 0 0 auto;
+			max-width: 100%;
+		}
+		#{ $root_container } {
+			&--fixed, 
+			&--liquid {
+				margin: 0 auto;
+				flex: 0 0 100%;
+				transition: 0.15s ease all;
+			}
+			&--fixed {
+				@include over( 'tablet' ) {
+					flex: 0 1 60em;
+				}
+				@include over( 'pc' ) {
+					flex: 0 1 80em;
+				}
+			}
+			&--liquid {
+				max-width: 100%;
+			}
+		}
+	}
+//	&--x {
+//		flex-direction: row;
+//	}
+	
+	&--y {
+		flex-direction: column;
+//		flex-wrap: nowrap;
+		> * {
+			flex: auto;
+		}
+	}
+	
+	&--c {
+		justify-content: center;
+		align-items    : center;
+		align-content  : center;
+	}
+	
+	&--order {
+		&-first {
+			@include responsive {
+				order: -1;
+			}
+		}
+		&-last {
+			@include responsive {
+				order: 1;
+			}
+		}
+	}
+	
+	&--margin {
+		@each $name, $width in $margin_table {
+			&-#{ $name } {
+				@include responsive {
+					margin: -( $width / 2 );
+					padding: 0;
+					> * {
+						margin: ( $width / 2 );
+					}
+				}
+			}
+		}
+	}
+}
+#{ $root_column } {
+	@include all_index_from( 1, /* through */ $max_column_num, "&--{{index}}" ) {
+		@include responsive {
+			align-items: stretch;
+		}
+		&#{ $root_arrange } {
+			&--margin {
+				@each $name, $width in $margin_table {
+					&-#{ $name } {
+						@include responsive {
+							overflow: hidden;
+							> *,
+							> * > #{ $root_arrange }--margin-auto {
+								margin: 0;
+								padding: ( $width / 2 );
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	@for $i from 1 through $max_column_num {
+		&--#{ $i } {
+			@include responsive {
+				> * {
+					flex: 0 0 percentage( 1 / $i );
+					transition: 0.35s ease all;
+				}
+			}
+		}
+	}
+	@for $max from 1 through $max_column_num {
+		@for $ratio from 1 through $max {
+			@if gcd( $max, $ratio ) == 1 {
+				&--#{ $ratio }of#{ $max } {
+					@include responsive {
+						flex: 0 0 percentage( 1 / $max * $ratio );
+					}
+				}
+			}
+		}
+	}
+}
+
+body {
+	min-height: 100vh;
+}
+
+main {
+	flex: 1;
+}
